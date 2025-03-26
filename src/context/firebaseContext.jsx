@@ -17,9 +17,7 @@ import {
 	doc,
 	getDocs,
 	getFirestore,
-	query,
 	updateDoc,
-	where,
 } from 'firebase/firestore';
 
 const FirebaseContext = createContext(null);
@@ -74,14 +72,44 @@ export const FirebaseProvider = (props) => {
 		return eventRef.id;
 	};
 
-	const bookSeat = async (bookingData) => {
-		const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
-		const eventRef = doc(db, 'events', bookingData.eventId);
+	// --
+	const bookSeat = async ({ eventId, seatId, availableSeats }) => {
+		const bookingRef = await addDoc(collection(db, 'bookings'), {
+			eventId,
+			seatId,
+			timestamp: new Date(),
+		});
+		const eventRef = doc(db, 'events', eventId);
 		await updateDoc(eventRef, {
-			availableSeats: bookingData.availableSeats - 1,
+			availableSeats: availableSeats - 1,
+		});
+		const seatRef = doc(db, 'events', eventId, 'seats', seatId);
+		await updateDoc(seatRef, {
+			booked: true,
 		});
 		return bookingRef.id;
 	};
+
+	// const deleteEvent = async (eventId) => {
+	// 	try {
+	// 		const eventRef = doc(db, 'events', eventId);
+	// 		const seatPromises = await getDocs(
+	// 			collection(db, 'events', eventId, 'seats')
+	// 		);
+
+	// 		const deleteSeatPromises = seatPromises.docs.map((seat) =>
+	// 			deleteDoc(doc(db, 'events', eventId, 'seats', seat.id))
+	// 		);
+	// 		await Promise.all(deleteSeatPromises);
+
+	// 		await deleteDoc(eventRef);
+	// 		return true;
+	// 	} catch (e) {
+	// 		console.error('Error deleting event: ', e);
+	// 		throw e;
+	// 	}
+	// };
+	
 
 	//Logout
 	const signOutUser = () => {
@@ -107,6 +135,7 @@ export const FirebaseProvider = (props) => {
 				createEvent,
 				bookSeat,
 				db,
+				// deleteEvent,
 			}}
 		>
 			{props.children}

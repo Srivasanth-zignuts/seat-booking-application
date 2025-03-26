@@ -2,7 +2,14 @@
 
 import Navbar from '@/components/Navbar';
 import { useFirebase } from '@/context/firebaseContext';
-import { Container, Typography, TextField, Button, Box } from '@mui/material';
+import {
+	Container,
+	Typography,
+	TextField,
+	Button,
+	Box,
+	CircularProgress,
+} from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -10,6 +17,7 @@ import { useState } from 'react';
 
 const CreateEventModal = () => {
 	const { createEvent, db } = useFirebase();
+	const [isLoading, setisLoading] = useState(false);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [form, setForm] = useState({
@@ -22,6 +30,7 @@ const CreateEventModal = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		setisLoading(true);
 		const totalSeats = parseInt(form.totalSeats, 10);
 		if (isNaN(totalSeats) || totalSeats <= 0) {
 			alert('Please enter valid number of seats');
@@ -46,8 +55,8 @@ const CreateEventModal = () => {
 			);
 			await Promise.all(seatPromises);
 
-			queryClient.invalidateQueries(['events']);
-
+			queryClient.invalidateQueries(['events']); // making page.jsx to refetch using react-query
+			setisLoading(false);
 			router.push('/');
 		} catch (error) {
 			console.error('Error creating event:', error);
@@ -58,6 +67,24 @@ const CreateEventModal = () => {
 	const handleChange = (e) => {
 		setForm({ ...form, [e.target.name]: e.target.value });
 	};
+
+	if (isLoading) {
+		return (
+			<div>
+				<Navbar />
+				<Container
+					sx={{
+						display: 'flex',
+						justifyContent: 'center',
+						mt: 4,
+						height: '100vh',
+					}}
+				>
+					<CircularProgress />
+				</Container>
+			</div>
+		);
+	}
 
 	return (
 		<div>

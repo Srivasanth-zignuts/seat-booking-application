@@ -15,9 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { useFirebase } from '@/context/firebaseContext';
 import { Person } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import CreateEventModal from '../app/create-event/page';
 
-const pages = ['Create Event'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const Navbar = () => {
@@ -130,15 +128,17 @@ const Navbar = () => {
 						SHOWTIME
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-						{pages.map((page) => (
-							<Button
-								key={page}
-								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: 'white', display: 'block' }}
-							>
-								{page}
-							</Button>
-						))}
+						<Button
+							sx={{
+								textAlign: 'center',
+								borderBottom: '1px solid #ffffff',
+								color: '#ffffff',
+							}}
+							onClick={handleCreateEvent}
+						>
+							{' '}
+							Create Event{' '}
+						</Button>
 					</Box>
 
 					<Box sx={{ flexGrow: 0 }}>
